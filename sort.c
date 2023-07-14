@@ -1,15 +1,60 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <vcruntime_string.h>
+//#include <memory.h>
+#include <string.h>
 
 int extraMemoryAllocated;
 
-// implements heap sort
-// extraMemoryAllocated counts bytes of memory allocated
-void heapSort(int arr[], int n)
-{
+void swap(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }
+
+void heapify(int* arr, int n, int i) {
+    int largest = i; // largest is the root
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    /*
+     * finds largest (root)
+     */
+    if (left < n && arr[left] > arr[largest]) {
+        largest = left;
+    }
+    if (right < n && arr[right] > arr[largest]) {
+        largest = right;
+    }
+
+    if (largest != i) {
+        swap(&arr[i], &arr[largest]); //Swaps
+        heapify(arr, n, largest); // Repeats
+    }
+}
+
+// extraMemoryAllocated counts bytes of extra memory allocated
+// Implemented heap sort
+void heapSort(int arr[], int n) {
+// Build a max heap
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        heapify(arr, n, i);
+    }
+
+// Extract elements from the heap one by one
+    for (int i = n - 1; i > 0; i--) {
+        swap(&arr[0], &arr[i]);
+        heapify(arr, i, 0);
+      // extraMemoryAllocated += sizeof(int);
+
+    }
+}
+
+
+
+// implement merge sort
+// extraMemoryAllocated counts bytes of extra memory allocated
+
 
 // Merge two subarrays L and M into arr
 void merge(int arr[], int l, int m, int r) {
@@ -68,16 +113,6 @@ void mergeSort(int arr[], int l, int r) {
         merge(arr, l, m, r);
     }
 }
-// implement merge sort
-// extraMemoryAllocated counts bytes of extra memory allocated
-//void mergeSort(int pData[], int l, int r)
-//{
-//    if (l > r) return;
-//    int q = (l+r) / 2;
-//    mergeSort(pData, l, q);
-//    mergeSort(pData, q+1, r);
-//    merge(pData,l,q,r);
-//}
 
 // parses input file to an integer array
 int parseData(char *inputFileName, int **ppData)
@@ -113,6 +148,7 @@ int parseData(char *inputFileName, int **ppData)
 // prints first and last 100 items in the data array
 void printArray(int pData[], int dataSz)
 {
+
 	int i, sz = dataSz - 100;
 	printf("\tData:\n\t");
 	for (i=0;i<100;++i)
@@ -120,7 +156,7 @@ void printArray(int pData[], int dataSz)
 		printf("%d ",pData[i]);
 	}
 	printf("\n\t");
-	
+
 	for (i=sz;i<dataSz;++i)
 	{
 		printf("%d ",pData[i]);
@@ -128,51 +164,67 @@ void printArray(int pData[], int dataSz)
 	printf("\n\n");
 }
 
-int main(void)
-{
-	clock_t start, end;
-	int i;
+void testHeap(){
+    printf("Testing\n");
+    int array[] = {4, 2, 6, 3, 63, 232, 42, 63};
+    int size = 8;
+    for (int i =  0; i < size; i++){
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+    heapSort(array, size);
+    printf("Sorted Heap: ");
+    for (int i =  0; i < size; i++){
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+}
+int main(void) {
+    //testHeap();
+    clock_t start, end;
+    int i;
     double cpu_time_used;
-	char* fileNames[] = { "input1.txt", "input2.txt", "input3.txt", "input4.txt" };
-	
-	for (i=0;i<4;++i)
-	{
-		int *pDataSrc, *pDataCopy;
-		int dataSz = parseData(fileNames[i], &pDataSrc);
-		
-		if (dataSz <= 0)
-			continue;
-		
-		pDataCopy = (int *)malloc(sizeof(int)*dataSz);
-	
-		printf("---------------------------\n");
-		printf("Dataset Size : %d\n",dataSz);
-		printf("---------------------------\n");
-		
-		printf("Heap Sort:\n");
-		memcpy(pDataCopy, pDataSrc, dataSz*sizeof(int));
-		extraMemoryAllocated = 0;
-		start = clock();
-		heapSort(pDataCopy, dataSz);
-		end = clock();
-		cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-		printf("\truntime\t\t\t: %.1lf\n",cpu_time_used);
-		printf("\textra memory allocated\t: %d\n",extraMemoryAllocated);
-		printArray(pDataCopy, dataSz);
-		
-		printf("Merge Sort:\n");
-		memcpy(pDataCopy, pDataSrc, dataSz*sizeof(int));
-		extraMemoryAllocated = 0;
-		start = clock();
-		mergeSort(pDataCopy, 0, dataSz - 1);
-		end = clock();
-		cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-		printf("\truntime\t\t\t: %.1lf\n",cpu_time_used);
-		printf("\textra memory allocated\t: %d\n",extraMemoryAllocated);
-		printArray(pDataCopy, dataSz);
-		
-		free(pDataCopy);
-		free(pDataSrc);
-	}
-	
+//    char *fileNames[] = {"C:\\Users\\matt1\\CLionProjects\\lab_assignment_8\\input1.txt", "C:\\Users\\matt1\\CLionProjects\\lab_assignment_8\\input2.txt", "C:\\Users\\matt1\\CLionProjects\\lab_assignment_8\\input3.txt", "C:\\Users\\matt1\\CLionProjects\\lab_assignment_8\\input5.txt"};
+    char *fileNames[] = {"input1.txt", "input2.txt", "input3.txt", "input4.txt"};
+//	char* fileNames[] = { "input1.txt", "input2.txt", "input3.txt"};
+    for (i = 0; i < 4; ++i) {
+        int *pDataSrc, *pDataCopy;
+        int dataSz = parseData(fileNames[i], &pDataSrc);
+
+        if (dataSz <= 0)
+            continue;
+
+        pDataCopy = (int *) malloc(sizeof(int) * dataSz);
+
+        printf("---------------------------\n");
+        printf("Dataset Size : %d\n", dataSz);
+        printf("---------------------------\n");
+
+        printf("Heap Sort:\n");
+        memcpy(pDataCopy, pDataSrc, dataSz * sizeof(int));
+        extraMemoryAllocated = 0;
+        start = clock();
+        heapSort(pDataCopy, dataSz);
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("\truntime\t\t\t: %.1lf\n", cpu_time_used);
+        printf("\textra memory allocated\t: %d\n", extraMemoryAllocated);
+        printArray(pDataCopy, dataSz);
+
+
+        printf("Merge Sort:\n");
+        memcpy(pDataCopy, pDataSrc, dataSz * sizeof(int));
+        extraMemoryAllocated = 0;
+        start = clock();
+        mergeSort(pDataCopy, 0, dataSz - 1);
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("\truntime\t\t\t: %.1lf\n", cpu_time_used);
+        printf("\textra memory allocated\t: %d\n", extraMemoryAllocated);
+        printArray(pDataCopy, dataSz);
+
+        free(pDataCopy);
+        free(pDataSrc);
+    }
+
 }
